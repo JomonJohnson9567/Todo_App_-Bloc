@@ -15,7 +15,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => TodoBloc(ApiServices())..add(GetTodoEvents()),
-      child: const HomePageContent(), // Extract content to separate widget
+      child: const HomePageContent(),
     );
   }
 }
