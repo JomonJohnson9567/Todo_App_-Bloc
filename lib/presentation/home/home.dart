@@ -12,64 +12,72 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => TodoBloc(ApiServices())..add(GetTodoEvents()),
-      child: DefaultTabController(
-        length: 2,
-        child: Scaffold(
-          appBar: AppBar(
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: () {
-                  context.read<TodoBloc>().add(GetTodoEvents());
-                  print('page refreshed');
-                },
-              ),
-            ],
-            title: const Text(
-              'TODO APP',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            centerTitle: true,
-            bottom: const TabBar(
-              tabs: [Tab(text: 'Incomplete'), Tab(text: 'Completed')],
-            ),
-          ),
-          body: BlocBuilder<TodoBloc, ToDoState>(
-            builder: (context, state) {
-              if (state is LoadingToDoState) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (state is LoadedToDo) {
-                final todos = state.todoList;
-                final completedTodos =
-                    todos.where((todo) => todo.isCompleted).toList();
-                final incompleteTodos =
-                    todos.where((todo) => !todo.isCompleted).toList();
-                return TabBarView(
-                  children: [
-                    _buildTodoList(context, incompleteTodos),
-                    _buildTodoList(context, completedTodos),
-                  ],
-                );
-              } else if (state is ErrorToDoState) {
-                return Center(child: Text(state.errorMessage));
-              } else {
-                return const SizedBox.shrink();
-              }
-            },
-          ),
+      child: const HomePageContent(), // Extract content to separate widget
+    );
+  }
+}
 
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => showNameDialog(context),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+class HomePageContent extends StatelessWidget {
+  const HomePageContent({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                context.read<TodoBloc>().add(GetTodoEvents());
+                print('page refreshed');
+              },
             ),
-            backgroundColor: Colors.blueAccent,
-            child: const Icon(Icons.add, size: 30, color: Colors.white),
+          ],
+          title: const Text(
+            'TODO APP',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
+          centerTitle: true,
+          bottom: const TabBar(
+            tabs: [Tab(text: 'Incomplete'), Tab(text: 'Completed')],
+          ),
+        ),
+        body: BlocBuilder<TodoBloc, ToDoState>(
+          builder: (context, state) {
+            if (state is LoadingToDoState) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is LoadedToDo) {
+              final todos = state.todoList;
+              final completedTodos =
+                  todos.where((todo) => todo.isCompleted).toList();
+              final incompleteTodos =
+                  todos.where((todo) => !todo.isCompleted).toList();
+              return TabBarView(
+                children: [
+                  _buildTodoList(context, incompleteTodos),
+                  _buildTodoList(context, completedTodos),
+                ],
+              );
+            } else if (state is ErrorToDoState) {
+              return Center(child: Text(state.errorMessage));
+            } else {
+              return const SizedBox.shrink();
+            }
+          },
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed:
+              () => showNameDialog(context), // Now context has access to BLoC
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          backgroundColor: Colors.blueAccent,
+          child: const Icon(Icons.add, size: 30, color: Colors.white),
         ),
       ),
     );
@@ -141,9 +149,6 @@ class HomePage extends StatelessWidget {
                         icon: const Icon(Icons.delete),
                         onPressed: () {
                           context.read<TodoBloc>().add(DeleteToDoEvent(todo));
-
-                          // TODO: implement Delete event
-                          // context.read<TodoBloc>().add(DeleteToDoEvents(todo));
                         },
                       ),
                     ],
